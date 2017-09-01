@@ -37,7 +37,7 @@ public class brokeOut implements ApplicationListener {
     int vertBricks = 4;
     int ballYSpeed, ballXSpeed;
     Rectangle bottomBound, topBound;
-    boolean ballUp, ballDown, ballLeft, ballRight;
+    boolean started = false;
     double ballDir;
     SpriteBatch batch;
     BitmapFont font;
@@ -85,10 +85,29 @@ public class brokeOut implements ApplicationListener {
 
     @Override
     public void render () {
-        if(lives >= 0)
+		if(!started)
+			intro();
+        else if(lives >= 0)
             running();
         else
             gameOver();
+    }
+
+    private void intro(){
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        cam.update();
+
+		batch.setProjectionMatrix(cam.combined);
+        batch.begin();
+        font.draw(batch, "BROKEOUT", WIDTH/2, HEIGHT/2);
+        font.draw(batch, "Control the paddle using your arrow keys", WIDTH/2, HEIGHT/2 - 10);
+		font.draw(batch, "Press any key to start", WIDTH/2, HEIGHT/2 - 25);
+		batch.end();
+
+		if(Gdx.input.isKeyPressed(Input.Keys.ANY_KEY))
+			started = true;
     }
 
     private void running(){
@@ -124,8 +143,8 @@ public class brokeOut implements ApplicationListener {
             if(paddle.x < Gdx.graphics.getWidth() - paddle.getWidth())
                 paddle.x += paddleSpeed * Gdx.graphics.getDeltaTime();
 
-        if(Gdx.input.isKeyPressed(Input.Keys.R))
-            resetBall();
+        /*if(Gdx.input.isKeyPressed(Input.Keys.R))
+            resetBall();*/
 
         ball.x += ballXSpeed * Gdx.graphics.getDeltaTime();
         ball.y += ballYSpeed * Gdx.graphics.getDeltaTime();
@@ -164,6 +183,11 @@ public class brokeOut implements ApplicationListener {
     }
 
     private void gameOver(){
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        cam.update();
+
         boolean isHigher = false;
         int oldHigh = prefs.getInteger("highScore", 0);
         if(score > oldHigh){
@@ -177,6 +201,7 @@ public class brokeOut implements ApplicationListener {
         font.draw(batch, "GAME OVER", WIDTH/2, HEIGHT/2);
         if(isHigher)
             font.draw(batch, "NEW HIGH SCORE", WIDTH/2, HEIGHT/2 - 15);
+        font.draw(batch, "Press R to reset", WIDTH/2, HEIGHT/2 - 50);
         batch.end();
         if(Gdx.input.isKeyPressed(Input.Keys.R)){
             score = 0;
